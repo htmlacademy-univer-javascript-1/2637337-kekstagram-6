@@ -58,35 +58,31 @@ const NAMES = [
 
 let commentId = 1;
 
-function createComment() {
-  const messageCount = getRandomInt(1, 2);
-  const message = Array.from({ length: messageCount }, () => getRandomArrayElement(MESSAGES)).join(' ');
-
-  return {
-    id: commentId++,
-    avatar: img/avatar-${getRandomInt(1, 6)}.svg,
-    message: message,
-    name: getRandomArrayElement(NAMES)
-  };
+function createComments(count) {
+  const comments = [];
+  for (let i = 0; i < count; i++) {
+    comments.push(createComment());
+  }
+  return comments;
 }
-
-//ГЕНЕРАЦИЯ ФОТОГРАФИЙ
 
 function createPhoto(id) {
   const commentsCount = getRandomInt(0, 30);
-  const comments = Array.from({ length: commentsCount }, createComment);
-
   return {
     id: id,
     url: photos/${id}.jpg,
     description: getRandomArrayElement(DESCRIPTIONS),
     likes: getRandomInt(15, 200),
-    comments: comments
+    comments: createComments(commentsCount)
   };
 }
 
 function generatePhotos() {
-  return Array.from({ length: 25 }, (_, i) => createPhoto(i + 1));
+  const photos = [];
+  for (let i = 1; i <= 25; i++) {
+    photos.push(createPhoto(i));
+  }
+  return photos;
 }
 
 // ВЫЗОВ
