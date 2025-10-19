@@ -1,3 +1,3 @@
 import { generatePosts } from './data.js';
+generatePosts();
 
-const posts = generatePosts();
