@@ -1,17 +1,17 @@
-const NAMES = [
-  'Виктория',
-  'Екатерина',
-  'Евгения',
-  'Кристина',
-  'Василиса',
-  'Георгий',
-  'Сергей',
+const USER_NAMES = [
+  'Артём',
+  'Мария',
   'Иван',
-  'Павел',
-  'Роман'
+  'Екатерина',
+  'Сергей',
+  'Ольга',
+  'Дмирий',
+  'Анна',
+  'Никита',
+  'Ксения'
 ];
 
-const MESSAGES = [
+const COMMENT_TEXTS = [
   'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
@@ -20,7 +20,7 @@ const MESSAGES = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
-const DESCRIPTIONS = [
+const PHOTO_CAPTIONS = [
   'Прекрасный момент, запечатлённый на камеру',
   'Люблю этот вид',
   'Как я тут оказался?',
@@ -29,12 +29,12 @@ const DESCRIPTIONS = [
   'Полный стрём!'
 ];
 
-const AVATAR_COUNT = 6;
-const POSTS_COUNT = 25;
-const COMMENT_COUNT = 30;
-const LIKE_MIN_COUNT = 15;
-const LIKE_MAX_COUNT = 200;
-const USED_POST_ID = [];
+const AVATAR_TOTAL = 6;
+const TOTAL_PHOTOS = 25;
+const MAX_COMMENTS = 30;
+const MIN_LIKES = 15;
+const MAX_LIKES = 200;
+const USED_PHOTO_IDS = [];
 
 const getRandomInteger = (a, b) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -70,26 +70,26 @@ const getCommentId = createIdGenerator();
 
 const createMessage = () => Array.from(
   { length: getRandomInteger(1, 2) },
-  () => getRandomArrayElement(MESSAGES),
+  () => getRandomArrayElement(COMMENT_TEXTS),
 ).join(' ');
 
 const createComment = () => ({
   id: getCommentId(),
-  avatar: `img/avatar-${ getRandomInteger(1, AVATAR_COUNT) }.svg`,
+  avatar: `img/avatar-${ getRandomInteger(1, AVATAR_TOTAL) }.svg`,
   message: createMessage(),
-  name: getRandomArrayElement(NAMES),
+  name: getRandomArrayElement(USER_NAMES),
 });
 
 const createPost = () => {
-  const postId = getRandomNoRepeatInt(1, POSTS_COUNT, USED_POST_ID);
+  const postId = getRandomNoRepeatInt(1, TOTAL_PHOTOS, USED_PHOTO_IDS);
 
   return {
     id: postId,
     url: `photos/${ postId }.jpg`,
-    description: getRandomArrayElement(DESCRIPTIONS),
-    likes: getRandomInteger(LIKE_MIN_COUNT, LIKE_MAX_COUNT),
+    description: getRandomArrayElement(PHOTO_CAPTIONS),
+    likes: getRandomInteger(MIN_LIKES, MAX_LIKES),
     comments: Array.from(
-      { length: getRandomInteger(0, COMMENT_COUNT) },
+      { length: getRandomInteger(0, MAX_COMMENTS) },
       createComment,
     ),
   };
@@ -97,6 +97,6 @@ const createPost = () => {
 
 // eslint-disable-next-line no-unused-vars
 const posts = Array.from(
-  { length: POSTS_COUNT },
+  { length: TOTAL_PHOTOS },
   createPost,
 );
