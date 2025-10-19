@@ -1,119 +1,102 @@
-`use strict`;
-
-//ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-
-/**
- * Возвращает случайное целое число из диапазона [min, max]
- */
-function getRandomInt(min, max) {
-  const lower = Math.ceil(Math.min(min, max));
-  const upper = Math.floor(Math.max(min, max));
-  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
-}
-
-/**
- * Возвращает случайный элемент массива
- */
-function getRandomArrayElement(elements) {
-  return elements[getRandomInt(0, elements.length - 1)];
-}
-
-//ДАННЫЕ ДЛЯ ГЕНЕРАЦИИ
-
-const DESCRIPTIONS = [
-  'Моё любимое место на свете 🌅',
-  'Поймал идеальный кадр!',
-  'Отдыхаю после трудного дня',
-  'Путешествие мечты ✈️',
-  'Это был потрясающий день 😍',
-  'Просто наслаждаюсь моментом',
-  'Кофе и тишина — лучшее утро ☕️',
-  'Когда природа вдохновляет',
-  'Тестирую новый фотоаппарат 📸',
-  'Случайный кадр, но мне нравится!',
-  'Настроение: лето и свобода 🌞',
-  'Фото с друзьями — всегда лучшие воспоминания!',
-  'Люблю этот город 💛',
-  'Мои маленькие радости',
-  'Лучше один раз увидеть 👀'
+const NAMES = [
+  'Виктория',
+  'Екатерина',
+  'Евгения',
+  'Кристина',
+  'Василиса',
+  'Георгий',
+  'Сергей',
+  'Иван',
+  'Павел',
+  'Роман'
 ];
 
 const MESSAGES = [
   'Всё отлично!',
-  'В целом всё неплохо. Но не всё.',
-  'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
-  'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
-  'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
-  'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
+  'В целом всё неплохо. Но не всё.',
+  'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
+  'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
+  'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
+  'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
 ];
 
-const NAMES = [
-  'Артём', 'Мария', 'Иван', 'Екатерина', 'Сергей',
-  'Ольга', 'Дмитрий', 'Анна', 'Никита', 'Ксения',
-  'Михаил', 'Алина', 'Игорь', 'Полина', 'Владимир'
+const DESCRIPTIONS = [
+  'Прекрасный момент, запечатлённый на камеру',
+  'Люблю этот вид',
+  'Как я тут оказался?',
+  'Ну что за красота!',
+  '2 из 10',
+  'Полный стрём!'
 ];
 
-// ГЕНЕРАЦИЯ КОММЕНТАРИЕВ
+const AVATAR_COUNT = 6;
+const POSTS_COUNT = 25;
+const COMMENT_COUNT = 30;
+const LIKE_MIN_COUNT = 15;
+const LIKE_MAX_COUNT = 200;
+const USED_POST_ID = [];
 
-let commentId = 1;
+const getRandomInteger = (a, b) => {
+  const lower = Math.ceil(Math.min(a, b));
+  const upper = Math.floor(Math.max(a, b));
+  const result = Math.random() * (upper - lower + 1) + lower;
+  return Math.floor(result);
+};
 
-/**
- * Создаёт один комментарий
- */
-function createComment() {
-  const messageCount = getRandomInt(1, 2);
-  let message = '';
+const getRandomArrayElement = (array) =>
+  array[getRandomInteger(0, array.length - 1)];
 
-  for (let i = 0; i < messageCount; i++) {
-    message += `${getRandomArrayElement(MESSAGES)}` ;
+const getRandomNoRepeatInt = (min, max, usedArray) => {
+  let currentValue;
+  currentValue = getRandomInteger(min, max);
+  while (usedArray.includes(currentValue))
+  {
+    currentValue = getRandomInteger(min, max);
   }
+  usedArray.push(currentValue);
+  return currentValue;
+};
 
-  return {
-    id: commentId++,
-    avatar: `img/avatar-${getRandomInt(1, 6)}.svg`,
-    message: message.trim(),
-    name: getRandomArrayElement(NAMES)
+const createIdGenerator = () => {
+  let lastGeneratedId = 0;
+
+  return () => {
+    lastGeneratedId += 1;
+    return lastGeneratedId;
   };
-}
+};
 
-/**
- * Создаёт массив комментариев
- */
-function createComments(count) {
-  const comments = [];
-  for (let i = 0; i < count; i++) {
-    comments.push(createComment());
-  }
-  return comments;
-}
+const getCommentId = createIdGenerator();
 
-//ГЕНЕРАЦИЯ ФОТОГРАФИЙ
+const createMessage = () => Array.from(
+  { length: getRandomInteger(1, 2) },
+  () => getRandomArrayElement(MESSAGES),
+).join(' ');
 
-/**
- * Создаёт объект фотографии
- */
-function createPhoto(id) {
-  const commentsCount = getRandomInt(0, 30);
+const createComment = () => ({
+  id: getCommentId(),
+  avatar: `img/avatar-${ getRandomInteger(1, AVATAR_COUNT) }.svg`,
+  message: createMessage(),
+  name: getRandomArrayElement(NAMES),
+});
+
+const createPost = () => {
+  const postId = getRandomNoRepeatInt(1, POSTS_COUNT, USED_POST_ID);
+
   return {
-    id: id,
-    url: `photos/${id}.jpg`,
+    id: postId,
+    url: `photos/${ postId }.jpg`,
     description: getRandomArrayElement(DESCRIPTIONS),
-    likes: getRandomInt(15, 200),
-    comments: createComments(commentsCount)
+    likes: getRandomInteger(LIKE_MIN_COUNT, LIKE_MAX_COUNT),
+    comments: Array.from(
+      { length: getRandomInteger(0, COMMENT_COUNT) },
+      createComment,
+    ),
   };
-}
+};
 
-/**
- * Генерирует массив из 25 фотографий
- */
-function generatePhotos() {
-  const photos = [];
-  for (let i = 1; i <= 25; i++) {
-    photos.push(createPhoto(i));
-  }
-  return photos;
-}
-
-//ВЫЗОВ
-
-const photos = generatePhotos();
+// eslint-disable-next-line no-unused-vars
+const posts = Array.from(
+  { length: POSTS_COUNT },
+  createPost,
+);
