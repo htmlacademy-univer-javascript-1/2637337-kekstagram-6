@@ -1,22 +1,21 @@
+`use strict`;
+
 //ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
 
-// Случайное число из диапазона (включительно)
+/**
+ * Возвращает случайное целое число из диапазона [min, max]
+ */
 function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  const lower = Math.ceil(Math.min(min, max));
+  const upper = Math.floor(Math.max(min, max));
+  return Math.floor(Math.random() * (upper - lower + 1)) + lower;
 }
 
-// Случайный элемент массива
-function getRandomArrayElement(arr) {
-  return arr[getRandomInt(0, arr.length - 1)];
-}
-
-// Перемешивание массива (алгоритм Фишера-Йетса)
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
+/**
+ * Возвращает случайный элемент массива
+ */
+function getRandomArrayElement(elements) {
+  return elements[getRandomInt(0, elements.length - 1)];
 }
 
 //ДАННЫЕ ДЛЯ ГЕНЕРАЦИИ
@@ -58,6 +57,28 @@ const NAMES = [
 
 let commentId = 1;
 
+/**
+ * Создаёт один комментарий
+ */
+function createComment() {
+  const messageCount = getRandomInt(1, 2);
+  let message = '';
+
+  for (let i = 0; i < messageCount; i++) {
+    message += `${getRandomArrayElement(MESSAGES)}` ;
+  }
+
+  return {
+    id: commentId++,
+    avatar: `img/avatar-${getRandomInt(1, 6)}.svg`,
+    message: message.trim(),
+    name: getRandomArrayElement(NAMES)
+  };
+}
+
+/**
+ * Создаёт массив комментариев
+ */
 function createComments(count) {
   const comments = [];
   for (let i = 0; i < count; i++) {
@@ -66,17 +87,25 @@ function createComments(count) {
   return comments;
 }
 
+//ГЕНЕРАЦИЯ ФОТОГРАФИЙ
+
+/**
+ * Создаёт объект фотографии
+ */
 function createPhoto(id) {
   const commentsCount = getRandomInt(0, 30);
   return {
     id: id,
-    url: photos/${id}.jpg,
+    url: `photos/${id}.jpg`,
     description: getRandomArrayElement(DESCRIPTIONS),
     likes: getRandomInt(15, 200),
     comments: createComments(commentsCount)
   };
 }
 
+/**
+ * Генерирует массив из 25 фотографий
+ */
 function generatePhotos() {
   const photos = [];
   for (let i = 1; i <= 25; i++) {
@@ -85,7 +114,6 @@ function generatePhotos() {
   return photos;
 }
 
-// ВЫЗОВ
+//ВЫЗОВ
 
 const photos = generatePhotos();
-console.log(photos);
