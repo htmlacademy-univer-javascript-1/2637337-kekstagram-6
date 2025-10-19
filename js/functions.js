@@ -1,39 +1,25 @@
-// Функция проверки длины строки
-function isStringWithinLength(string, maxLength) {
-  return string.length <= maxLength;
+/**
+ * Проверяет, укладывается ли встреча в рамки рабочего дня
+ * @param {string} workStart - начало рабочего дня ('8:00')
+ * @param {string} workEnd - конец рабочего дня ('17:30')
+ * @param {string} meetingStart - начало встречи ('14:00')
+ * @param {number} duration - длительность встречи в минутах
+ * @returns {boolean} true — если встреча в пределах рабочего дня, иначе false
+ */
+function isMeetingWithinWorkHours(workStart, workEnd, meetingStart, duration) {
+  // Функция для перевода "часы:минуты" → минуты от начала дня
+  const toMinutes = (timeString) => {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const workStartMinutes = toMinutes(workStart);
+  const workEndMinutes = toMinutes(workEnd);
+  const meetingStartMinutes = toMinutes(meetingStart);
+  const meetingEndMinutes = meetingStartMinutes + duration;
+
+  // Проверяем, что встреча начинается и заканчивается в рабочее время
+  return meetingStartMinutes >= workStartMinutes && meetingEndMinutes <= workEndMinutes;
 }
 
-
-
-
-// Функция проверки палиндрома
-function isPalindrome(string) {
-  // Убираем пробелы и приводим к нижнему регистру
-  const normalized = string.replaceAll(' ', '').toLowerCase();
-  // Разворачиваем строку
-  const reversed = normalized.split('').reverse().join('');
-  return normalized === reversed;
-}
-
-
-
-
-//  Дополнительное задание — извлечение чисел из строки
-function extractNumber(value) {
-  // Приводим аргумент к строке (чтобы обработать числа)
-  const str = value.toString();
-  let result = '';
-
-  for (let i = 0; i < str.length; i++) {
-    const char = str[i];
-    const parsed = parseInt(char, 10);
-    // Проверяем, является ли символ цифрой
-    if (!Number.isNaN(parsed)) {
-      result += parsed;
-    }
-  }
-
-  // Если не нашли цифр — возвращаем NaN
-  return result ? parseInt(result, 10) : NaN;
-}
-
+isMeetingWithinWorkHours();
