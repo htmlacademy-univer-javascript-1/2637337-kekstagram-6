@@ -35,15 +35,4 @@ export const MAX_COMMENTS = 30;
 export const MIN_LIKES = 15;
 export const MAX_LIKES = 200;
 export const USED_PHOTO_IDS = [];
-
-export const bigPicture = document.querySelector('.big-picture');
-export const bigPictureClose = document.querySelector('.big-picture__cancel');
-export const bigPictureImg = bigPicture.querySelector('.big-picture__img img');
-export const bigPictureDescription = bigPicture.querySelector('.social__caption');
-export const bigPictureLikes = bigPicture.querySelector('.likes-count');
-export const bigPictureCommentsCount = bigPicture.querySelector('.comments-count');
-export const bigPictureCommentsList = bigPicture.querySelector('.social__comments');
-export const bigPictureOpenContainer = document.querySelector('.pictures');
-export const bigPictureCommentCount = document.querySelector('.social__comment-count');
-export const bigPictureCommentLoader = document.querySelector('.comments-loader');
-export const body = document.body;
+export const COMMENTS_LOADING_SIZE = 5;

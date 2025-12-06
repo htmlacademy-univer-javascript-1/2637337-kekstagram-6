@@ -1,62 +1,35 @@
-import {
-  bigPicture,
-  bigPictureClose,
-  bigPictureImg,
-  bigPictureDescription,
-  bigPictureLikes,
-  bigPictureCommentsCount,
-  bigPictureCommentsList,
-  bigPictureOpenContainer,
-  bigPictureCommentCount,
-  bigPictureCommentLoader,
-  body
-} from './constants.js';
-
 import { isEscapeKey } from './util.js';
 import { postsArray } from './gallery.js';
+import { initComments, onCommentsLoaderClick, resetComments } from './gallery-comments.js';
+import { initLikes, onLikesClick, resetLikes } from './gallery-likes.js';
 
-const createCommentElement = (comment) => {
-  const commentElement = document.createElement('li');
-  commentElement.classList.add('social__comment');
+const openPostViewer = document.querySelector('.pictures');
+const closePostViewer = document.querySelector('.big-picture__cancel');
+const mainwindow = document.body;
 
-  const avatarImg = document.createElement('img');
-  avatarImg.classList.add('social__picture');
-  avatarImg.src = comment.avatar;
-  avatarImg.alt = comment.name;
-  avatarImg.width = 35;
-  avatarImg.height = 35;
+const postViewer = document.querySelector('.big-picture');
+const postViewerImg = postViewer.querySelector('.big-picture__img img');
+const postViewerDescription = postViewer.querySelector('.social__caption');
+const postViewerComments = postViewer.querySelector('.comments-count');
+const postViewerCommentLoader = document.querySelector('.comments-loader');
+const postViewerLikes = postViewer.querySelector('.likes-count');
 
-  const textElement = document.createElement('p');
-  textElement.classList.add('social__text');
-  textElement.textContent = comment.message;
-
-  commentElement.appendChild(avatarImg);
-  commentElement.appendChild(textElement);
-
-  return commentElement;
-};
-
-const renderAllComments = (comments) => {
-  bigPictureCommentsList.innerHTML = '';
-  comments.forEach((comment) => {
-    bigPictureCommentsList.appendChild(createCommentElement(comment));
-  });
-};
-
-const closeBigPicture = () => {
-  bigPicture.classList.add('hidden');
-  bigPictureCommentCount.classList.remove('hidden');
-  bigPictureCommentLoader.classList.remove('hidden');
-  body.classList.remove('modal-open');
+const onClosePostViewer = () => {
+  postViewer.classList.add('hidden');
+  mainwindow.classList.remove('modal-open');
   document.removeEventListener('keydown', onDocumentKeydown);
+
+  resetComments();
+  resetLikes();
 };
 
-const openBigPicture = () => {
-  bigPicture.classList.remove('hidden');
-  bigPictureCommentCount.classList.add('hidden');
-  bigPictureCommentLoader.classList.add('hidden');
-  body.classList.add('modal-open');
+const onOpenPostViewer = () => {
+  postViewer.classList.remove('hidden');
+  mainwindow.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
+
+  postViewerCommentLoader.addEventListener('click', onCommentsLoaderClick);
+  postViewerLikes.addEventListener('click', onLikesClick);
 };
 
 const onThumbnailClick = (evt) => {
@@ -65,34 +38,34 @@ const onThumbnailClick = (evt) => {
   if (thumbnail) {
     const currentThumbnails = Array.from(document.querySelectorAll('.picture'));
     const thumbnailImg = thumbnail.querySelector('.picture__img');
-    const thumbnailLikes = thumbnail.querySelector('.picture__likes').textContent;
-    const thumbnailComments = thumbnail.querySelector('.picture__comments').textContent;
-
-    bigPictureImg.src = thumbnailImg.src;
-    bigPictureDescription.textContent = thumbnailImg.alt;
-    bigPictureLikes.textContent = thumbnailLikes;
-    bigPictureCommentsCount.textContent = thumbnailComments;
-
     const index = currentThumbnails.indexOf(thumbnail);
-    if (index !== -1) {
-      renderAllComments(postsArray[index].comments);
-    }
 
-    openBigPicture();
+    if (index !== -1) {
+      const postData = postsArray[index];
+
+      postViewerImg.src = thumbnailImg.src;
+      postViewerDescription.textContent = thumbnailImg.alt;
+      postViewerComments.textContent = postData.comments.length;
+
+      initLikes(index, postData.likes);
+      initComments(postData.comments);
+
+      onOpenPostViewer();
+    }
   }
 };
 
-bigPictureClose.addEventListener('click', () => {
-  closeBigPicture();
+closePostViewer.addEventListener('click', () => {
+  onClosePostViewer();
 });
 
-bigPictureOpenContainer.addEventListener('click', (evt) => {
+openPostViewer.addEventListener('click', (evt) => {
   onThumbnailClick(evt);
 });
 
 function onDocumentKeydown (evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    closeBigPicture();
+    onClosePostViewer();
   }
 }
