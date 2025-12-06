@@ -1,7 +1,7 @@
 import { generatePosts } from './data.js';
 
 const templateNode = document.querySelector('#picture').content.querySelector('.picture');
-const postsArray = generatePosts();
+export const postsArray = generatePosts();
 const galleryContainer = document.querySelector('.pictures');
 const fragment = document.createDocumentFragment();
 
