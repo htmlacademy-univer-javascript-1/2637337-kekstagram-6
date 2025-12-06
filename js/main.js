@@ -1,3 +1,1 @@
-import { generatePosts } from './data.js';
-generatePosts();
-
+import './gallery.js';
