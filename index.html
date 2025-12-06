@@ -119,7 +119,9 @@
                     <input class="text__hashtags" name="hashtags" placeholder="#ХэшТег">
                   </div>
                   <div class="img-upload__field-wrapper">
-                    <textarea class="text__description" name="description" placeholder="Ваш комментарий..."></textarea>
+                    <textarea class="text__description" name="description" placeholder="Ваш комментарий...">
+                    data-pristine-maxlength="140"
+                    data-pristine-maxlength-message="Комментарий не должен превышать 140 символов"</textarea>
                   </div>
                 </fieldset>
 
@@ -231,7 +233,7 @@
   <template id="messages">
     <div class="img-upload__message  img-upload__message--loading">Загружаем...</div>
   </template>
-  <script src="js/functions.js"></script>
+  <script src="node_modules/pristinejs/dist/pristine.js"></script>
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>
