@@ -12,24 +12,8 @@ const effectRadios = document.querySelectorAll('.effects__radio');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
 const effectLevel = document.querySelector('.img-upload__effect-level');
-const effectsPreview = document.querySelectorAll('.effects__preview');
 
 let currentEffect = 'none';
-
-const updateMiniPreviews = () => {
-  const imgSrc = editingImage.src;
-  effectsPreview.forEach((preview) => {
-    preview.style.backgroundImage = `url(${imgSrc})`;
-    const effectClass = preview.className.match(/effects__preview--(\w+)/);
-    if (effectClass) {
-      const effect = effectClass[1];
-      const effectData = EFFECTS[effect];
-      preview.style.filter = effect === 'none'
-        ? 'none'
-        : `${effectData.filter}(${effectData.max}${effectData.unit})`;
-    }
-  });
-};
 
 const initSlider = () => {
   if (!effectLevelSlider) {return;}
@@ -38,44 +22,60 @@ const initSlider = () => {
     effectLevelSlider.noUiSlider.destroy();
   }
 
-  noUiSlider.create(effectLevelSlider, {
+  window.noUiSlider.create(effectLevelSlider, {
     range: { min: 0, max: 100 },
     start: 100,
     step: 1,
-    connect: 'lower'
+    connect: 'lower',
+    format: {
+      to: (value) => value.toFixed(1),
+      from: (value) => parseFloat(value)
+    }
   });
 };
 
 const updateSliderOptions = (effect) => {
   const effectData = EFFECTS[effect];
-  effectLevelSlider.noUiSlider.updateOptions({
-    range: { min: effectData.min, max: effectData.max },
-    start: effectData.max,
-    step: effectData.step
-  });
+  if (effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.updateOptions({
+      range: { min: effectData.min, max: effectData.max },
+      start: effectData.max,
+      step: effectData.step
+    });
+  }
 };
 
 const applyEffect = (effect, value) => {
   const effectData = EFFECTS[effect];
-  editingImage.style.filter = effect === 'none'
-    ? 'none'
-    : `${effectData.filter}(${value}${effectData.unit})`;
+  if (editingImage) {
+    editingImage.style.filter = effect === 'none' ? 'none' : `${effectData.filter}(${value}${effectData.unit})`;
+  }
+};
+
+const cleanupEffect = () => {
+  if (editingImage) {editingImage.style.filter = 'none';}
+  if (effectLevelValue) {effectLevelValue.value = '';}
 };
 
 const onSliderUpdate = () => {
+  if (!effectLevelSlider.noUiSlider) {return;}
+
   const sliderValue = effectLevelSlider.noUiSlider.get();
-  effectLevelValue.value = sliderValue;
-  if (currentEffect !== 'none') {applyEffect(currentEffect, sliderValue);}
+  if (effectLevelValue) {effectLevelValue.value = sliderValue;}
+
+  if (currentEffect !== 'none') {
+    applyEffect(currentEffect, sliderValue);
+  }
 };
 
 const onEffectChangeHandler = (evt) => {
   currentEffect = evt.target.value;
 
   if (currentEffect === 'none') {
-    effectLevel.style.display = 'none';
-    applyEffect('none', 0);
+    if (effectLevel) {effectLevel.style.display = 'none';}
+    cleanupEffect();
   } else {
-    effectLevel.style.display = 'block';
+    if (effectLevel) {effectLevel.style.display = 'block';}
     const effectData = EFFECTS[currentEffect];
     applyEffect(currentEffect, effectData.max);
     updateSliderOptions(currentEffect);
@@ -83,33 +83,50 @@ const onEffectChangeHandler = (evt) => {
 };
 
 const removeEffectEventListeners = () => {
-  effectRadios.forEach((radio) =>
-    radio.removeEventListener('change', onEffectChangeHandler)
-  );
-  effectLevelSlider.noUiSlider.off('update');
+  effectRadios.forEach((radio) => radio.removeEventListener('change', onEffectChangeHandler));
+  if (effectLevelSlider && effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.off('update');
+  }
 };
 
 const initEffects = () => {
+  if (!effectLevelSlider || !editingImage) {return;}
+
   initSlider();
-  updateMiniPreviews();
+  if (effectLevelSlider.noUiSlider) {effectLevelSlider.noUiSlider.on('update', onSliderUpdate);}
+  effectRadios.forEach((radio) => radio.addEventListener('change', onEffectChangeHandler));
+  if (effectLevel) {effectLevel.style.display = 'none';}
 
-  effectLevelSlider.noUiSlider.on('update', onSliderUpdate);
+  const noneEffectRadio = document.querySelector('#effect-none');
+  if (noneEffectRadio) {noneEffectRadio.checked = true;}
 
-  effectRadios.forEach((radio) =>
-    radio.addEventListener('change', onEffectChangeHandler)
-  );
-
-  effectLevel.style.display = 'none';
+  cleanupEffect();
   currentEffect = 'none';
-  editingImage.style.filter = 'none';
 };
 
 const resetEffects = () => {
   removeEffectEventListeners();
+  cleanupEffect();
   currentEffect = 'none';
-  editingImage.style.filter = 'none';
-  effectLevel.style.display = 'none';
-  updateMiniPreviews();
+  if (effectLevel) {effectLevel.style.display = 'none';}
+
+  const noneEffectRadio = document.querySelector('#effect-none');
+  if (noneEffectRadio) {noneEffectRadio.checked = true;}
+
+  if (effectLevelSlider && effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.updateOptions({ range: { min: 0, max: 100 }, start: 100, step: 1 });
+  }
 };
 
-export { initEffects, resetEffects };
+// Новые функции для photo-editing.js
+const getCurrentEffect = () => currentEffect;
+
+const getCurrentScale = () => {
+  if (editingImage) {
+    const transform = editingImage.style.transform;
+    const match = transform.match(/scale\(([\d.]+)\)/);
+    return match ? parseFloat(match[1]) : 1;
+  }
+  return 1;
+};
+export { initEffects, resetEffects, getCurrentEffect, getCurrentScale };

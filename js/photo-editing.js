@@ -1,9 +1,10 @@
 import { isEscapeKey } from './util.js';
 import { resetFormValidation, initFormValidation } from './validation.js';
-import { initEffects, resetEffects } from './photo-effects.js';
+import { initEffects, resetEffects, getCurrentEffect, getCurrentScale } from './photo-effects.js';
 import { initScale, resetScale } from './photo-scale.js';
 import { sendData } from './api.js';
 import { showSuccessMessage, showErrorMessage } from './messages.js';
+import { renderGallery, getPostsArray } from './gallery.js';
 
 const photoInput = document.querySelector('.img-upload__input');
 const overlay = document.querySelector('.img-upload__overlay');
@@ -14,9 +15,9 @@ const submitButton = form.querySelector('.img-upload__submit');
 const previewImage = document.querySelector('.img-upload__preview img');
 const hashtagInput = form.querySelector('.text__hashtags');
 const commentInput = form.querySelector('.text__description');
+const effectsPreviews = document.querySelectorAll('.effects__preview'); // Добавили
 
-// 🔥 Добавляем выбор всех мини-превью
-const effectsPreview = document.querySelectorAll('.effects__preview');
+let currentFile = null;
 
 const isTextFieldFocused = () =>
   document.activeElement === hashtagInput ||
@@ -27,36 +28,41 @@ const setSubmitButtonState = (disabled) => {
   submitButton.textContent = disabled ? 'Отправка...' : 'Опубликовать';
 };
 
-// 🔥 Новая функция — обновляем мини-превью
-const updateEffectsPreview = (fileUrl) => {
-  effectsPreview.forEach((item) => {
-    item.style.backgroundImage = `url('${fileUrl}')`;
-  });
+// Функция для обновления превью эффектов
+const updateEffectsPreviews = () => {
+  if (previewImage.src && previewImage.src !== 'img/upload-default-image.jpg') {
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url(${previewImage.src})`;
+    });
+  }
 };
 
 const closeEditor = () => {
   resetEffects();
   resetScale();
   resetFormValidation();
-
   form.reset();
-
   overlay.classList.add('hidden');
   body.classList.remove('modal-open');
   document.removeEventListener('keydown', onEscKeydown);
-
   previewImage.src = 'img/upload-default-image.jpg';
-  updateEffectsPreview('img/upload-default-image.jpg'); // 🔥 Вернули плейсхолдер
+  previewImage.style.transform = 'scale(1)';
+  previewImage.style.filter = 'none';
+  currentFile = null;
+
+  // Сбрасываем превью эффектов
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
 };
 
 const openEditor = () => {
-  const file = photoInput.files[0];
-  if (file) {
-    const fileUrl = URL.createObjectURL(file);
-    previewImage.src = fileUrl;
+  if (!photoInput.files[0]) {return;}
+  currentFile = photoInput.files[0];
+  previewImage.src = URL.createObjectURL(currentFile);
 
-    updateEffectsPreview(fileUrl); // 🔥 Мини-превью → такая же картинка
-  }
+  // ОБНОВЛЯЕМ ПРЕВЬЮ ЭФФЕКТОВ
+  updateEffectsPreviews();
 
   overlay.classList.remove('hidden');
   body.classList.add('modal-open');
@@ -80,6 +86,22 @@ const onFormSubmit = async (evt) => {
   try {
     const formData = new FormData(form);
     await sendData(formData);
+
+    // Добавляем фотографию в галерею с примененным фильтром и масштабом
+    if (currentFile) {
+      const newPost = {
+        id: Date.now(),
+        url: previewImage.src,
+        description: commentInput.value,
+        likes: 0,
+        comments: [],
+        effect: getCurrentEffect(),
+        scale: getCurrentScale()
+      };
+      const posts = [...getPostsArray(), newPost];
+      renderGallery(posts);
+    }
+
     closeEditor();
     showSuccessMessage();
   } catch(error) {
