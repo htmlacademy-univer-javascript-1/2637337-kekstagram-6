@@ -1,7 +1,7 @@
 import { isEscapeKey } from './util.js';
-import { postsArray } from './gallery.js';
-import { initComments, onCommentsLoaderClick, resetComments } from './gallery-comments.js';
-import { initLikes, onLikesClick, resetLikes } from './gallery-likes.js';
+import { getPostsArray } from './gallery.js';
+import { initComments, resetComments } from './gallery-comments.js';
+import { initLikes, resetLikes } from './gallery-likes.js';
 
 const openPostViewer = document.querySelector('.pictures');
 const closePostViewer = document.querySelector('.big-picture__cancel');
@@ -11,8 +11,6 @@ const postViewer = document.querySelector('.big-picture');
 const postViewerImg = postViewer.querySelector('.big-picture__img img');
 const postViewerDescription = postViewer.querySelector('.social__caption');
 const postViewerComments = postViewer.querySelector('.comments-count');
-const postViewerCommentLoader = document.querySelector('.comments-loader');
-const postViewerLikes = postViewer.querySelector('.likes-count');
 
 const onClosePostViewer = () => {
   postViewer.classList.add('hidden');
@@ -27,25 +25,25 @@ const onOpenPostViewer = () => {
   postViewer.classList.remove('hidden');
   mainwindow.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
-
-  postViewerCommentLoader.addEventListener('click', onCommentsLoaderClick);
-  postViewerLikes.addEventListener('click', onLikesClick);
 };
 
 const onThumbnailClick = (evt) => {
   const thumbnail = evt.target.closest('.picture');
 
   if (thumbnail) {
-    const currentThumbnails = Array.from(document.querySelectorAll('.picture'));
-    const thumbnailImg = thumbnail.querySelector('.picture__img');
-    const index = currentThumbnails.indexOf(thumbnail);
+    const postsArray = getPostsArray();
+    const postId = thumbnail.dataset.id;
 
-    if (index !== -1) {
-      const postData = postsArray[index];
+    const postData = postsArray.find((item) => String(item.id) === postId);
 
-      postViewerImg.src = thumbnailImg.src;
-      postViewerDescription.textContent = thumbnailImg.alt;
+    if (postData) {
+      postViewerImg.src = postData.url;
+      postViewerImg.alt = postData.description;
+      postViewerDescription.textContent = postData.description;
       postViewerComments.textContent = postData.comments.length;
+
+      const currentThumbnails = Array.from(document.querySelectorAll('.picture'));
+      const index = currentThumbnails.indexOf(thumbnail);
 
       initLikes(index, postData.likes);
       initComments(postData.comments);
@@ -55,17 +53,16 @@ const onThumbnailClick = (evt) => {
   }
 };
 
-closePostViewer.addEventListener('click', () => {
-  onClosePostViewer();
-});
+const initGalleryViewer = () => {
+  closePostViewer.addEventListener('click', onClosePostViewer);
+  openPostViewer.addEventListener('click', onThumbnailClick);
+};
 
-openPostViewer.addEventListener('click', (evt) => {
-  onThumbnailClick(evt);
-});
-
-function onDocumentKeydown (evt) {
+function onDocumentKeydown(evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
     onClosePostViewer();
   }
 }
+
+export { initGalleryViewer };

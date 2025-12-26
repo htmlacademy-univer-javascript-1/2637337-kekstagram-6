@@ -15,10 +15,13 @@ const effectLevel = document.querySelector('.img-upload__effect-level');
 
 let currentEffect = 'none';
 
-// Инициализация слайдера
 const initSlider = () => {
-  if (!effectLevelSlider || effectLevelSlider.noUiSlider) {
+  if (!effectLevelSlider) {
     return;
+  }
+
+  if (effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.destroy();
   }
 
   window.noUiSlider.create(effectLevelSlider, {
@@ -30,17 +33,12 @@ const initSlider = () => {
     step: 1,
     connect: 'lower',
     format: {
-      to: function (value) {
-        return value.toFixed(1);
-      },
-      from: function (value) {
-        return parseFloat(value);
-      }
+      to: (value) => value.toFixed(1),
+      from: (value) => parseFloat(value)
     }
   });
 };
 
-// Обновление настроек слайдера
 const updateSliderOptions = (effect) => {
   const effectData = EFFECTS[effect];
   if (effectLevelSlider.noUiSlider) {
@@ -55,44 +53,55 @@ const updateSliderOptions = (effect) => {
   }
 };
 
-// Применение эффекта к изображению
 const applyEffect = (effect, value) => {
   const effectData = EFFECTS[effect];
-  editingImage.style.filter = `${effectData.filter}(${value}${effectData.unit})`;
+  if (editingImage) {
+    editingImage.style.filter = effect === 'none' ? 'none' : `${effectData.filter}(${value}${effectData.unit})`;
+  }
 };
 
-// Очистка эффекта
 const cleanupEffect = () => {
-  editingImage.style.filter = 'none';
-  effectLevelValue.value = '';
+  if (editingImage) {
+    editingImage.style.filter = 'none';
+  }
+  if (effectLevelValue) {
+    effectLevelValue.value = '';
+  }
 };
 
-// Обработчик обновления слайдера
 const onSliderUpdate = () => {
+  if (!effectLevelSlider.noUiSlider) {
+    return;
+  }
+
   const sliderValue = effectLevelSlider.noUiSlider.get();
-  effectLevelValue.value = sliderValue;
+  if (effectLevelValue) {
+    effectLevelValue.value = sliderValue;
+  }
 
   if (currentEffect !== 'none') {
     applyEffect(currentEffect, sliderValue);
   }
 };
 
-// Обработчик изменения эффекта
 const onEffectChangeHandler = (evt) => {
   currentEffect = evt.target.value;
 
   if (currentEffect === 'none') {
-    effectLevel.style.display = 'none';
+    if (effectLevel) {
+      effectLevel.style.display = 'none';
+    }
     cleanupEffect();
   } else {
-    effectLevel.style.display = 'block';
+    if (effectLevel) {
+      effectLevel.style.display = 'block';
+    }
     const effectData = EFFECTS[currentEffect];
     applyEffect(currentEffect, effectData.max);
     updateSliderOptions(currentEffect);
   }
 };
 
-// Удаление обработчиков событий
 const removeEffectEventListeners = () => {
   effectRadios.forEach((radio) => {
     radio.removeEventListener('change', onEffectChangeHandler);
@@ -103,13 +112,14 @@ const removeEffectEventListeners = () => {
   }
 };
 
-// Инициализация эффектов
 const initEffects = () => {
-  // Создаем слайдер
+  if (!effectLevelSlider || !editingImage) {
+    return;
+  }
+
   initSlider();
 
-  // Добавляем обработчики
-  if (effectLevelSlider && effectLevelSlider.noUiSlider) {
+  if (effectLevelSlider.noUiSlider) {
     effectLevelSlider.noUiSlider.on('update', onSliderUpdate);
   }
 
@@ -117,43 +127,34 @@ const initEffects = () => {
     radio.addEventListener('change', onEffectChangeHandler);
   });
 
-  // Скрываем слайдер по умолчанию
   if (effectLevel) {
     effectLevel.style.display = 'none';
   }
 
-  // Устанавливаем эффект по умолчанию
   const noneEffectRadio = document.querySelector('#effect-none');
   if (noneEffectRadio) {
     noneEffectRadio.checked = true;
   }
 
-  // Очищаем эффект
   cleanupEffect();
   currentEffect = 'none';
 };
 
-// Сброс эффектов
 const resetEffects = () => {
-  // Удаляем обработчики
   removeEffectEventListeners();
 
-  // Сбрасываем состояние
   cleanupEffect();
   currentEffect = 'none';
 
-  // Скрываем слайдер
   if (effectLevel) {
     effectLevel.style.display = 'none';
   }
 
-  // Сбрасываем выбор эффекта
   const noneEffectRadio = document.querySelector('#effect-none');
   if (noneEffectRadio) {
     noneEffectRadio.checked = true;
   }
 
-  // Сбрасываем настройки слайдера
   if (effectLevelSlider && effectLevelSlider.noUiSlider) {
     effectLevelSlider.noUiSlider.updateOptions({
       range: { min: 0, max: 100 },

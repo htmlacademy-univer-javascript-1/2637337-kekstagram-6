@@ -17,7 +17,7 @@ export const COMMENT_TEXTS = [
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра.',
   'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота.',
-  'Лица у людей на фотке перекошены — неудачный момент!'
+  'Лиfaces у людей на фотке перекошены — неудачный момент!'
 ];
 
 export const PHOTO_CAPTIONS = [
@@ -34,5 +34,6 @@ export const TOTAL_PHOTOS = 25;
 export const MAX_COMMENTS = 30;
 export const MIN_LIKES = 15;
 export const MAX_LIKES = 200;
-export const USED_PHOTO_IDS = [];
 export const COMMENTS_LOADING_SIZE = 5;
+
+export const createUsedPhotoIds = () => [];
