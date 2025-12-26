@@ -20,11 +20,7 @@ const form = document.querySelector('.img-upload__form');
 const hashtagInput = form.querySelector('.text__hashtags');
 const commentInput = form.querySelector('.text__description');
 
-const pristine = new Pristine(form, {
-  classTo: 'img-upload__field-wrapper',
-  errorTextParent: 'img-upload__field-wrapper',
-  errorTextClass: 'img-upload__field-wrapper--error'
-});
+let pristine;
 
 const normalizeHashtags = (tagString) => tagString
   .trim()
@@ -44,62 +40,52 @@ const hasUniqueHashtags = (value) => {
 
 const hasValidComment = (value) => value.length <= MAX_COMMENT_LENGTH;
 
-pristine.addValidator(
-  hashtagInput,
-  hasValidHashtags,
-  ErrorText.INVALID_PATTERN,
-  ValidatorPriority.PATTERN,
-  true
-);
-
-pristine.addValidator(
-  hashtagInput,
-  hasValidCount,
-  ErrorText.INVALID_COUNT,
-  ValidatorPriority.COUNT,
-  true
-);
-
-pristine.addValidator(
-  hashtagInput,
-  hasUniqueHashtags,
-  ErrorText.NOT_UNIQUE,
-  ValidatorPriority.UNIQUENESS,
-  true
-);
-
-pristine.addValidator(
-  commentInput,
-  hasValidComment,
-  ErrorText.INVALID_COMMENT,
-  ValidatorPriority.COMMENT,
-  true
-);
-
-const onFormSubmit = (evt) => {
-  const isValid = pristine.validate();
-
-  if (!isValid) {
-    evt.preventDefault();
-  }
-};
-
-const onHashtagInput = () => {
-  pristine.validate(hashtagInput);
-};
-
-const onCommentInput = () => {
-  pristine.validate(commentInput);
-};
-
 const initFormValidation = () => {
-  form.addEventListener('submit', onFormSubmit);
-  hashtagInput.addEventListener('input', onHashtagInput);
-  commentInput.addEventListener('input', onCommentInput);
+  pristine = new Pristine(form, {
+    classTo: 'img-upload__field-wrapper',
+    errorTextParent: 'img-upload__field-wrapper',
+    errorTextClass: 'img-upload__field-wrapper--error'
+  });
+
+  pristine.addValidator(
+    hashtagInput,
+    hasValidHashtags,
+    ErrorText.INVALID_PATTERN,
+    ValidatorPriority.PATTERN,
+    true
+  );
+
+  pristine.addValidator(
+    hashtagInput,
+    hasValidCount,
+    ErrorText.INVALID_COUNT,
+    ValidatorPriority.INVALID_COUNT,
+    true
+  );
+
+  pristine.addValidator(
+    hashtagInput,
+    hasUniqueHashtags,
+    ErrorText.NOT_UNIQUE,
+    ValidatorPriority.UNIQUENESS,
+    true
+  );
+
+  pristine.addValidator(
+    commentInput,
+    hasValidComment,
+    ErrorText.INVALID_COMMENT,
+    ValidatorPriority.COMMENT,
+    true
+  );
+
+  window.pristine = pristine;
 };
 
 const resetFormValidation = () => {
-  pristine.reset();
+  if (pristine) {
+    pristine.reset();
+  }
 };
 
 export { resetFormValidation, initFormValidation };

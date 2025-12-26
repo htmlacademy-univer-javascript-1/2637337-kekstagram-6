@@ -3,10 +3,6 @@ import { COMMENTS_LOADING_SIZE } from './constants.js';
 let postCommentsList = [];
 let isCommentsShown = 0;
 
-const postViewerCommentList = document.querySelector('.social__comments');
-const postViewerCommentCount = document.querySelector('.social__comment-count');
-const postViewerCommentLoader = document.querySelector('.comments-loader');
-
 const createCommentElement = (comment) => {
   const commentElement = document.createElement('li');
   commentElement.classList.add('social__comment');
@@ -29,6 +25,14 @@ const createCommentElement = (comment) => {
 };
 
 const renderCommentsPortion = () => {
+  const postViewerCommentList = document.querySelector('.social__comments');
+  const postViewerCommentCount = document.querySelector('.social__comment-count');
+  const postViewerCommentLoader = document.querySelector('.comments-loader');
+
+  if (!postViewerCommentList || !postViewerCommentCount || !postViewerCommentLoader) {
+    return;
+  }
+
   const commentsToShow = postCommentsList.slice(isCommentsShown, isCommentsShown + COMMENTS_LOADING_SIZE);
 
   commentsToShow.forEach((comment) => {
@@ -51,16 +55,32 @@ const onCommentsLoaderClick = () => {
 };
 
 const initComments = (comments) => {
+  const postViewerCommentList = document.querySelector('.social__comments');
+  const postViewerCommentLoader = document.querySelector('.comments-loader');
+
+  if (!postViewerCommentList || !postViewerCommentLoader) {
+    return;
+  }
+
   postCommentsList = comments;
   isCommentsShown = 0;
   postViewerCommentList.innerHTML = '';
+
+  postViewerCommentLoader.removeEventListener('click', onCommentsLoaderClick);
+  postViewerCommentLoader.addEventListener('click', onCommentsLoaderClick);
+
+  if (comments.length > 0 && comments.length <= COMMENTS_LOADING_SIZE) {
+    postViewerCommentLoader.classList.add('hidden');
+  } else {
+    postViewerCommentLoader.classList.remove('hidden');
+  }
+
   renderCommentsPortion();
 };
 
 const resetComments = () => {
   postCommentsList = [];
   isCommentsShown = 0;
-  postViewerCommentLoader.removeEventListener('click', onCommentsLoaderClick);
 };
 
-export { initComments, onCommentsLoaderClick, resetComments };
+export { initComments, resetComments };

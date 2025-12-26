@@ -27,7 +27,6 @@ const onScaleBiggerButtonClick = () => {
   updateScale();
 };
 
-// Удаление обработчиков
 const removeScaleEventListeners = () => {
   if (scaleSmallerButton) {
     scaleSmallerButton.removeEventListener('click', onScaleSmallerButtonClick);
@@ -37,24 +36,18 @@ const removeScaleEventListeners = () => {
   }
 };
 
-// Сброс масштаба
 const cleanupScale = () => {
   currentScale = Scale.DEFAULT;
   updateScale();
 };
 
-// Инициализация масштаба
 const initScale = () => {
-  // Удаляем старые обработчики
   removeScaleEventListeners();
-  // Добавляем новые обработчики
   scaleSmallerButton.addEventListener('click', onScaleSmallerButtonClick);
   scaleBiggerButton.addEventListener('click', onScaleBiggerButtonClick);
-  // Устанавливаем начальное значение
   cleanupScale();
 };
 
-// Полный сброс
 const resetScale = () => {
   removeScaleEventListeners();
   cleanupScale();

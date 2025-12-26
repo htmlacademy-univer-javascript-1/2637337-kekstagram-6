@@ -7,7 +7,7 @@ import {
   MAX_COMMENTS,
   MIN_LIKES,
   MAX_LIKES,
-  USED_PHOTO_IDS
+  createUsedPhotoIds
 } from './constants.js';
 
 import {
@@ -18,6 +18,7 @@ import {
 } from './util.js';
 
 const getCommentId = createIdGenerator();
+const USED_PHOTO_IDS = createUsedPhotoIds();
 
 const createMessage = () =>
   Array.from(

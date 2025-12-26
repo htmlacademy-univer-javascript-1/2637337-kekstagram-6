@@ -1,18 +1,40 @@
-import { generatePosts } from './data.js';
+import { getData } from './api.js';
+import { showErrorMessage } from './messages.js';
 
-const templateNode = document.querySelector('#picture').content.querySelector('.picture');
-export const postsArray = generatePosts();
-const galleryContainer = document.querySelector('.pictures');
-const fragment = document.createDocumentFragment();
+const template = document.querySelector('#picture').content.querySelector('.picture');
+const container = document.querySelector('.pictures');
 
-postsArray.forEach(({ url, description, likes, comments }) => {
-  const postNode = templateNode.cloneNode(true);
-  const imageNode = postNode.querySelector('.picture__img');
-  imageNode.src = url;
-  imageNode.alt = description;
-  postNode.querySelector('.picture__likes').textContent = likes;
-  postNode.querySelector('.picture__comments').textContent = comments.length;
-  fragment.append(postNode);
-});
+let posts = [];
 
-galleryContainer.append(fragment);
+const renderGallery = (data) => {
+  const fragment = document.createDocumentFragment();
+
+  data.forEach((item) => {
+    const picture = template.cloneNode(true);
+
+    picture.querySelector('.picture__img').src = item.url;
+    picture.querySelector('.picture__img').alt = item.description;
+    picture.querySelector('.picture__likes').textContent = item.likes;
+    picture.querySelector('.picture__comments').textContent = item.comments.length;
+
+    picture.dataset.id = item.id;
+
+    fragment.append(picture);
+  });
+
+  container.append(fragment);
+  posts = data;
+};
+
+const initGallery = async () => {
+  try {
+    const data = await getData();
+    renderGallery(data);
+  } catch(error) {
+    showErrorMessage();
+  }
+};
+
+const getPostsArray = () => posts;
+
+export { initGallery, getPostsArray };
