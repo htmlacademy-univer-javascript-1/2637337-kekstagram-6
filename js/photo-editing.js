@@ -15,6 +15,9 @@ const previewImage = document.querySelector('.img-upload__preview img');
 const hashtagInput = form.querySelector('.text__hashtags');
 const commentInput = form.querySelector('.text__description');
 
+// 🔥 Добавляем выбор всех мини-превью
+const effectsPreview = document.querySelectorAll('.effects__preview');
+
 const isTextFieldFocused = () =>
   document.activeElement === hashtagInput ||
   document.activeElement === commentInput;
@@ -22,6 +25,13 @@ const isTextFieldFocused = () =>
 const setSubmitButtonState = (disabled) => {
   submitButton.disabled = disabled;
   submitButton.textContent = disabled ? 'Отправка...' : 'Опубликовать';
+};
+
+// 🔥 Новая функция — обновляем мини-превью
+const updateEffectsPreview = (fileUrl) => {
+  effectsPreview.forEach((item) => {
+    item.style.backgroundImage = `url('${fileUrl}')`;
+  });
 };
 
 const closeEditor = () => {
@@ -36,14 +46,16 @@ const closeEditor = () => {
   document.removeEventListener('keydown', onEscKeydown);
 
   previewImage.src = 'img/upload-default-image.jpg';
-  previewImage.style.transform = 'scale(1)';
-  previewImage.style.filter = 'none';
+  updateEffectsPreview('img/upload-default-image.jpg'); // 🔥 Вернули плейсхолдер
 };
 
 const openEditor = () => {
   const file = photoInput.files[0];
   if (file) {
-    previewImage.src = URL.createObjectURL(file);
+    const fileUrl = URL.createObjectURL(file);
+    previewImage.src = fileUrl;
+
+    updateEffectsPreview(fileUrl); // 🔥 Мини-превью → такая же картинка
   }
 
   overlay.classList.remove('hidden');
@@ -68,7 +80,6 @@ const onFormSubmit = async (evt) => {
   try {
     const formData = new FormData(form);
     await sendData(formData);
-
     closeEditor();
     showSuccessMessage();
   } catch(error) {
