@@ -1,4 +1,3 @@
-// gallery.js
 import { getData } from './api.js';
 import { initFilters } from './filters.js';
 
@@ -8,14 +7,12 @@ const galleryContainer = document.querySelector('.pictures');
 let allPosts = [];
 let currentPosts = [];
 
-// Функция применения эффекта к изображению
+
 const applyEffectToImage = (imgElement, effect, scale) => {
   if (!imgElement) {return;}
 
-  // Применяем масштаб
   imgElement.style.transform = `scale(${scale || 1})`;
 
-  // Применяем фильтр
   const effectsMap = {
     'chrome': 'grayscale(1)',
     'sepia': 'sepia(1)',
@@ -26,6 +23,26 @@ const applyEffectToImage = (imgElement, effect, scale) => {
   };
 
   imgElement.style.filter = effectsMap[effect] || 'none';
+};
+
+const showLoadErrorMessage = () => {
+  const alertContainer = document.createElement('div');
+  alertContainer.style.position = 'fixed';
+  alertContainer.style.top = '0';
+  alertContainer.style.left = '0';
+  alertContainer.style.width = '100%';
+  alertContainer.style.padding = '10px 20px';
+  alertContainer.style.backgroundColor = '#ff4d4d';
+  alertContainer.style.color = 'white';
+  alertContainer.style.textAlign = 'center';
+  alertContainer.style.zIndex = '1000';
+  alertContainer.textContent = 'Не удалось загрузить фотографии. Пожалуйста, попробуйте позже.';
+
+  document.body.appendChild(alertContainer);
+
+  setTimeout(() => {
+    alertContainer.remove();
+  }, 5000);
 };
 
 const clearGallery = () => {
@@ -47,11 +64,9 @@ const renderGallery = (posts) => {
     const postNode = template.cloneNode(true);
     const imageNode = postNode.querySelector('.picture__img');
 
-    // Устанавливаем источник изображения
     imageNode.src = post.url;
     imageNode.alt = post.description;
 
-    // ВАЖНО: ПРИМЕНЯЕМ ЭФФЕКТЫ И МАСШТАБ К МИНИАТЮРЕ!
     applyEffectToImage(imageNode, post.effect, post.scale);
 
     const likesElement = postNode.querySelector('.picture__likes');
@@ -76,15 +91,16 @@ const initGallery = async () => {
   try {
     const data = await getData();
     allPosts = data;
-    // Добавляем поля по умолчанию для фото с сервера
+
     allPosts = allPosts.map((post) => ({
       ...post,
-      effect: post.effect || 'none',    // если уже есть - используем, иначе 'none'
-      scale: post.scale || 1            // если уже есть - используем, иначе 1
+      effect: post.effect || 'none',
+      scale: post.scale || 1
     }));
     renderGallery(allPosts);
     initFilters();
   } catch (_) {
+    showLoadErrorMessage();
     renderGallery([]);
   }
 };

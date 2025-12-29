@@ -118,7 +118,6 @@ const resetEffects = () => {
   }
 };
 
-// Новые функции для photo-editing.js
 const getCurrentEffect = () => currentEffect;
 
 const getCurrentScale = () => {
