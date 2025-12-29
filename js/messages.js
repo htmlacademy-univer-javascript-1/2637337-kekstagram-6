@@ -15,15 +15,15 @@ const showMessage = (templateId, buttonSelector) => {
   const template = document.querySelector(templateId);
   const element = template.content.cloneNode(true).firstElementChild;
 
-  // Сначала объявляем onEscKeydown как function expression
+
   const onEscKeydown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      close(); // function declaration hoisted
+      close();
     }
   };
 
-  // Используем function declaration для close (hoisting!)
+
   function close() {
     element.remove();
     document.removeEventListener('keydown', onEscKeydown);
@@ -35,7 +35,6 @@ const showMessage = (templateId, buttonSelector) => {
 
   const button = element.querySelector(buttonSelector);
   if (button) {
-    // уже подписаны, но оставим в явном виде по критерию
     button.addEventListener('click', close);
   }
 

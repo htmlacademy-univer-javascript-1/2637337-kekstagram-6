@@ -28,7 +28,7 @@ const setSubmitButtonState = (disabled) => {
   submitButton.textContent = disabled ? 'Отправка...' : 'Опубликовать';
 };
 
-// Функция для обновления превью эффектов
+
 const updateEffectsPreviews = () => {
   if (previewImage.src && previewImage.src !== 'img/upload-default-image.jpg') {
     effectsPreviews.forEach((preview) => {
@@ -50,18 +50,20 @@ const closeEditor = () => {
   previewImage.style.filter = 'none';
   currentFile = null;
 
-  // Сбрасываем превью эффектов
+
   effectsPreviews.forEach((preview) => {
     preview.style.backgroundImage = '';
   });
+
+  photoInput.value = '';
 };
+
 
 const openEditor = () => {
   if (!photoInput.files[0]) {return;}
   currentFile = photoInput.files[0];
   previewImage.src = URL.createObjectURL(currentFile);
 
-  // ОБНОВЛЯЕМ ПРЕВЬЮ ЭФФЕКТОВ
   updateEffectsPreviews();
 
   overlay.classList.remove('hidden');
@@ -87,7 +89,6 @@ const onFormSubmit = async (evt) => {
     const formData = new FormData(form);
     await sendData(formData);
 
-    // Добавляем фотографию в галерею с примененным фильтром и масштабом
     if (currentFile) {
       const newPost = {
         id: Date.now(),
