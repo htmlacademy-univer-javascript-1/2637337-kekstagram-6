@@ -1,89 +1,91 @@
-// filters.js
-import { getPostsArray, renderGallery, getAllPosts } from './gallery.js';
+import { debounce } from './util.js';
+import { renderPictures } from './gallery.js';
+import { getRandomInteger } from './util.js';
 
-// Функция debounce для устранения дребезга
-function debounce(callback, timeoutDelay = 500) {
-  let timeoutId;
-  return (...rest) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
-  };
-}
+const RANDOM_COUNT = 10;
+const DELAY = 500;
 
-// Элементы фильтров
-const filtersContainer = document.querySelector('.img-filters');
-const filtersForm = document.querySelector('.img-filters__form');
-
-// Очистка галереи (только фотографии, значок Кексограмм не трогаем)
-const clearGallery = () => {
-  const galleryContainer = document.querySelector('.pictures');
-  const pictures = galleryContainer.querySelectorAll('.picture');
-  pictures.forEach((el) => el.remove());
+const FilterType = {
+  DEFAULT: 'filter-default',
+  RANDOM: 'filter-random',
+  DISCUSSED: 'filter-discussed'
 };
 
-// Получение 10 случайных постов без повторений
-const getRandomPosts = (posts, count) => {
-  const postsCopy = [...posts];
-  const result = [];
-  while (result.length < count && postsCopy.length > 0) {
-    const index = Math.floor(Math.random() * postsCopy.length);
-    result.push(postsCopy.splice(index, 1)[0]);
-  }
+const filterContainer = document.querySelector('.img-filters');
+const filterForm = document.querySelector('.img-filters__form');
+
+let currentFilter = FilterType.DEFAULT;
+let pictures = [];
+
+const sortByComments = (pictureA, pictureB) => pictureB.comments.length - pictureA.comments.length;
+
+const getRandomPictures = () => {
+  const copy = [...pictures];
+  const count = Math.min(RANDOM_COUNT, copy.length);
+
+  const result = Array.from({ length: count }, () => {
+    const randomIndex = getRandomInteger(0, copy.length - 1);
+    const randomItem = copy[randomIndex];
+    copy.splice(randomIndex, 1);
+    return randomItem;
+  });
+
   return result;
 };
 
-// Применение фильтра
-const applyFilter = (filterType) => {
-  let filteredPosts;
-
-  switch (filterType) {
-    case 'random':
-      filteredPosts = getRandomPosts(getPostsArray(), 10);
-      break;
-    case 'discussed':
-      filteredPosts = [...getPostsArray()].sort((a, b) => b.comments.length - a.comments.length).slice(0, 10);
-      break;
-    case 'default':
+const getFilteredPictures = () => {
+  switch (currentFilter) {
+    case FilterType.RANDOM:
+      return getRandomPictures();
+    case FilterType.DISCUSSED:
+      return [...pictures].sort(sortByComments);
     default:
-      filteredPosts = getAllPosts(); // возвращаем все 25
+      return [...pictures];
   }
-
-  clearGallery();
-  renderGallery(filteredPosts);
 };
 
-// Обработчик клика с debounce
-const onFilterClick = debounce((evt) => {
-  const button = evt.target.closest('.img-filters__button');
-  if (!button) {return;}
+const renderFilteredPictures = debounce(() => {
+  const filteredPictures = getFilteredPictures();
+  renderPictures(filteredPictures);
+}, DELAY);
 
-  // Сбрасываем активный класс
-  filtersForm.querySelectorAll('.img-filters__button').forEach((btn) => {
-    btn.classList.remove('img-filters__button--active');
-  });
+const onFilterChange = (evt) => {
+  const filterButton = evt.target.closest('.img-filters__button');
 
-  button.classList.add('img-filters__button--active');
-
-  // Определяем фильтр по id кнопки
-  switch (button.id) {
-    case 'filter-default':
-      applyFilter('default');
-      break;
-    case 'filter-random':
-      applyFilter('random');
-      break;
-    case 'filter-discussed':
-      applyFilter('discussed');
-      break;
+  if (!filterButton || filterButton.id === currentFilter) {
+    return;
   }
-}, 500);
 
-// Инициализация фильтров
-const initFilters = () => {
-  if (!filtersContainer || !filtersForm) {return;}
+  const activeButton = filterForm.querySelector('.img-filters__button--active');
+  if (activeButton) {
+    activeButton.classList.remove('img-filters__button--active');
+  }
 
-  filtersContainer.classList.remove('img-filters--inactive');
-  filtersForm.addEventListener('click', onFilterClick);
+  filterButton.classList.add('img-filters__button--active');
+  currentFilter = filterButton.id;
+  renderFilteredPictures();
 };
 
-export { initFilters };
+const initFilters = (loadedPictures) => {
+  pictures = loadedPictures;
+  filterContainer.classList.remove('img-filters--inactive');
+  filterForm.addEventListener('click', onFilterChange);
+};
+
+const resetFilters = () => {
+  filterForm.removeEventListener('click', onFilterChange);
+  currentFilter = FilterType.DEFAULT;
+  pictures = [];
+
+  const activeButton = filterForm.querySelector('.img-filters__button--active');
+  if (activeButton) {
+    activeButton.classList.remove('img-filters__button--active');
+  }
+
+  const defaultButton = filterForm.querySelector(`#${FilterType.DEFAULT}`);
+  if (defaultButton) {
+    defaultButton.classList.add('img-filters__button--active');
+  }
+};
+
+export { initFilters, resetFilters };

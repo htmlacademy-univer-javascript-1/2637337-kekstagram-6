@@ -12,28 +12,24 @@ const editingImage = document.querySelector('.img-upload__preview img');
 
 let currentScale = Scale.DEFAULT;
 
+const getScaleTransform = (scale) => `scale(${scale / 100})`;
+
 const updateScale = () => {
   scaleValue.value = `${currentScale}%`;
-  editingImage.style.transform = `scale(${currentScale / 100})`;
+  editingImage.style.transform = getScaleTransform(currentScale);
 };
 
+const getDecreasedScale = (scale) => Math.max(Scale.MIN, scale - Scale.STEP);
+const getIncreasedScale = (scale) => Math.min(Scale.MAX, scale + Scale.STEP);
+
 const onScaleSmallerButtonClick = () => {
-  currentScale = Math.max(Scale.MIN, currentScale - Scale.STEP);
+  currentScale = getDecreasedScale(currentScale);
   updateScale();
 };
 
 const onScaleBiggerButtonClick = () => {
-  currentScale = Math.min(Scale.MAX, currentScale + Scale.STEP);
+  currentScale = getIncreasedScale(currentScale);
   updateScale();
-};
-
-const removeScaleEventListeners = () => {
-  if (scaleSmallerButton) {
-    scaleSmallerButton.removeEventListener('click', onScaleSmallerButtonClick);
-  }
-  if (scaleBiggerButton) {
-    scaleBiggerButton.removeEventListener('click', onScaleBiggerButtonClick);
-  }
 };
 
 const cleanupScale = () => {
@@ -42,15 +38,14 @@ const cleanupScale = () => {
 };
 
 const initScale = () => {
-  removeScaleEventListeners();
   scaleSmallerButton.addEventListener('click', onScaleSmallerButtonClick);
   scaleBiggerButton.addEventListener('click', onScaleBiggerButtonClick);
   cleanupScale();
 };
 
 const resetScale = () => {
-  removeScaleEventListeners();
-  cleanupScale();
+  scaleSmallerButton.removeEventListener('click', onScaleSmallerButtonClick);
+  scaleBiggerButton.removeEventListener('click', onScaleBiggerButtonClick);
 };
 
-export { initScale, resetScale };
+export { initScale, resetScale, cleanupScale };
