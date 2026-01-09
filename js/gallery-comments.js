@@ -1,7 +1,10 @@
-import { COMMENTS_LOADING_SIZE } from './constants.js';
-
-let postCommentsList = [];
+const COMMENTS_LOADING_SIZE = 5;
+let pictureCommentsList = [];
 let isCommentsShown = 0;
+
+const bigPicCommentList = document.querySelector('.social__comments');
+const bigPicCommentCount = document.querySelector('.social__comment-count');
+const bigPicCommentLoader = document.querySelector('.comments-loader');
 
 const createCommentElement = (comment) => {
   const commentElement = document.createElement('li');
@@ -25,28 +28,20 @@ const createCommentElement = (comment) => {
 };
 
 const renderCommentsPortion = () => {
-  const postViewerCommentList = document.querySelector('.social__comments');
-  const postViewerCommentCount = document.querySelector('.social__comment-count');
-  const postViewerCommentLoader = document.querySelector('.comments-loader');
-
-  if (!postViewerCommentList || !postViewerCommentCount || !postViewerCommentLoader) {
-    return;
-  }
-
-  const commentsToShow = postCommentsList.slice(isCommentsShown, isCommentsShown + COMMENTS_LOADING_SIZE);
+  const commentsToShow = pictureCommentsList.slice(isCommentsShown, isCommentsShown + COMMENTS_LOADING_SIZE);
 
   commentsToShow.forEach((comment) => {
     const commentElement = createCommentElement(comment);
-    postViewerCommentList.appendChild(commentElement);
+    bigPicCommentList.appendChild(commentElement);
   });
 
   isCommentsShown += commentsToShow.length;
-  postViewerCommentCount.innerHTML = `${isCommentsShown} из <span class="comments-count">${postCommentsList.length}</span> комментариев`;
+  bigPicCommentCount.innerHTML = `${isCommentsShown} из <span class="comments-count">${pictureCommentsList.length}</span> комментариев`;
 
-  if (isCommentsShown >= postCommentsList.length) {
-    postViewerCommentLoader.classList.add('hidden');
+  if (isCommentsShown >= pictureCommentsList.length) {
+    bigPicCommentLoader.classList.add('hidden');
   } else {
-    postViewerCommentLoader.classList.remove('hidden');
+    bigPicCommentLoader.classList.remove('hidden');
   }
 };
 
@@ -55,32 +50,22 @@ const onCommentsLoaderClick = () => {
 };
 
 const initComments = (comments) => {
-  const postViewerCommentList = document.querySelector('.social__comments');
-  const postViewerCommentLoader = document.querySelector('.comments-loader');
-
-  if (!postViewerCommentList || !postViewerCommentLoader) {
-    return;
-  }
-
-  postCommentsList = comments;
+  pictureCommentsList = comments;
   isCommentsShown = 0;
-  postViewerCommentList.innerHTML = '';
-
-  postViewerCommentLoader.removeEventListener('click', onCommentsLoaderClick);
-  postViewerCommentLoader.addEventListener('click', onCommentsLoaderClick);
-
-  if (comments.length > 0 && comments.length <= COMMENTS_LOADING_SIZE) {
-    postViewerCommentLoader.classList.add('hidden');
+  bigPicCommentList.innerHTML = '';
+  if (comments.length > COMMENTS_LOADING_SIZE) {
+    bigPicCommentLoader.classList.remove('hidden');
   } else {
-    postViewerCommentLoader.classList.remove('hidden');
+    bigPicCommentLoader.classList.add('hidden');
   }
 
   renderCommentsPortion();
 };
 
 const resetComments = () => {
-  postCommentsList = [];
+  pictureCommentsList = [];
   isCommentsShown = 0;
+  bigPicCommentLoader.removeEventListener('click', onCommentsLoaderClick);
 };
 
-export { initComments, resetComments };
+export { initComments, onCommentsLoaderClick, resetComments };

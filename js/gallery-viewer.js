@@ -1,68 +1,74 @@
 import { isEscapeKey } from './util.js';
-import { getPostsArray } from './gallery.js';
-import { initComments, resetComments } from './gallery-comments.js';
-import { initLikes, resetLikes } from './gallery-likes.js';
+import { getPictures } from './gallery.js';
+import { initComments, onCommentsLoaderClick, resetComments } from './gallery-comments.js';
+import { initLikes, onLikesClick, resetLikes } from './gallery-likes.js';
 
-const openPostViewer = document.querySelector('.pictures');
-const closePostViewer = document.querySelector('.big-picture__cancel');
-const mainwindow = document.body;
+const openBigPic = document.querySelector('.pictures');
+const closeBigPic = document.querySelector('.big-picture__cancel');
+const mainWindow = document.body;
 
-const postViewer = document.querySelector('.big-picture');
-const postViewerImg = postViewer.querySelector('.big-picture__img img');
-const postViewerDescription = postViewer.querySelector('.social__caption');
-const postViewerComments = postViewer.querySelector('.comments-count');
+const bigPicture = document.querySelector('.big-picture');
+const bigPicImg = bigPicture.querySelector('.big-picture__img img');
+const bigPicDescription = bigPicture.querySelector('.social__caption');
+const bigPicComments = bigPicture.querySelector('.comments-count');
+const bigPicCommentLoader = document.querySelector('.comments-loader');
+const bigPicLikes = document.querySelector('.likes-count');
+const bigPicCommentInput = document.querySelector('.social__footer-text');
 
-const onClosePostViewer = () => {
-  postViewer.classList.add('hidden');
-  mainwindow.classList.remove('modal-open');
+const onCloseBigPic = () => {
+  bigPicture.classList.add('hidden');
+  mainWindow.classList.remove('modal-open');
   document.removeEventListener('keydown', onDocumentKeydown);
+
+  if (bigPicCommentInput) {
+    bigPicCommentInput.value = '';
+  }
 
   resetComments();
   resetLikes();
 };
 
-const onOpenPostViewer = () => {
-  postViewer.classList.remove('hidden');
-  mainwindow.classList.add('modal-open');
+const onOpenBigPic = () => {
+  bigPicture.classList.remove('hidden');
+  mainWindow.classList.add('modal-open');
   document.addEventListener('keydown', onDocumentKeydown);
+  bigPicCommentLoader.addEventListener('click', onCommentsLoaderClick);
+  bigPicLikes.addEventListener('click', onLikesClick);
 };
 
 const onThumbnailClick = (evt) => {
   const thumbnail = evt.target.closest('.picture');
 
   if (thumbnail) {
-    const postsArray = getPostsArray();
-    const postId = thumbnail.dataset.id;
+    const pictures = getPictures();
+    const index = parseInt(thumbnail.dataset.index, 10);
 
-    const postData = postsArray.find((item) => String(item.id) === postId);
+    if (index !== -1) {
+      const pictureData = pictures[index];
 
-    if (postData) {
-      postViewerImg.src = postData.url;
-      postViewerImg.alt = postData.description;
-      postViewerDescription.textContent = postData.description;
-      postViewerComments.textContent = postData.comments.length;
+      bigPicImg.src = pictureData.url;
+      bigPicDescription.textContent = pictureData.description;
+      bigPicComments.textContent = pictureData.comments.length;
 
-      const currentThumbnails = Array.from(document.querySelectorAll('.picture'));
-      const index = currentThumbnails.indexOf(thumbnail);
+      initLikes(index, pictureData.likes);
+      initComments(pictureData.comments);
 
-      initLikes(index, postData.likes);
-      initComments(postData.comments);
-
-      onOpenPostViewer();
+      onOpenBigPic();
     }
   }
 };
 
-const initGalleryViewer = () => {
-  closePostViewer.addEventListener('click', onClosePostViewer);
-  openPostViewer.addEventListener('click', onThumbnailClick);
-};
+closeBigPic.addEventListener('click', () => {
+  onCloseBigPic();
+});
 
-function onDocumentKeydown(evt) {
+openBigPic.addEventListener('click', (evt) => {
+  onThumbnailClick(evt);
+});
+
+function onDocumentKeydown (evt) {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
-    onClosePostViewer();
+    onCloseBigPic();
   }
 }
-
-export { initGalleryViewer };

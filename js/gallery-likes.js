@@ -1,60 +1,48 @@
-import { getPostsArray } from './gallery.js';
+import { getPictures } from './gallery.js';
 
-let isLiked = false;
-let currentPostIndex = -1;
+let currentPictureIndex = -1;
+
+const bigPicLikes = document.querySelector('.likes-count');
 
 const onToggleLike = () => {
-  if (currentPostIndex !== -1) {
-    const postsArray = getPostsArray();
-    const postViewerLikes = document.querySelector('.likes-count');
+  if (currentPictureIndex !== -1) {
+    const pictures = getPictures();
+    const picture = pictures[currentPictureIndex];
 
-    if (!postViewerLikes) {
+    if (!picture) {
       return;
     }
 
-    if (isLiked) {
-      postsArray[currentPostIndex].likes--;
-      isLiked = false;
+    if (picture.userLiked) {
+      picture.likes--;
+      picture.userLiked = false;
     } else {
-      postsArray[currentPostIndex].likes++;
-      isLiked = true;
+      picture.likes++;
+      picture.userLiked = true;
     }
 
-    const currentThumbnails = Array.from(document.querySelectorAll('.picture'));
-    postViewerLikes.textContent = postsArray[currentPostIndex].likes;
-    const thumbnail = currentThumbnails[currentPostIndex];
+    bigPicLikes.textContent = picture.likes;
+
+    const thumbnail = document.querySelector(`.picture[data-index="${currentPictureIndex}"]`);
     if (thumbnail) {
-      const thumbnailLikes = thumbnail.querySelector('.picture__likes');
-      if (thumbnailLikes) {
-        thumbnailLikes.textContent = postsArray[currentPostIndex].likes;
-      }
+      thumbnail.querySelector('.picture__likes').textContent = picture.likes;
     }
   }
 };
 
-const onLikesClick = (evt) => {
-  evt.preventDefault();
+const onLikesClick = () => {
   onToggleLike();
 };
 
 const initLikes = (pictureIndex, likesCount) => {
-  const postViewerLikes = document.querySelector('.likes-count');
-
-  if (!postViewerLikes) {
-    return;
-  }
-
-  currentPostIndex = pictureIndex;
-  isLiked = false;
-  postViewerLikes.textContent = likesCount;
-
-  postViewerLikes.removeEventListener('click', onLikesClick);
-  postViewerLikes.addEventListener('click', onLikesClick);
+  currentPictureIndex = pictureIndex;
+  bigPicLikes.textContent = likesCount;
+  bigPicLikes.addEventListener('click', onLikesClick);
 };
 
 const resetLikes = () => {
-  isLiked = false;
-  currentPostIndex = -1;
+  currentPictureIndex = -1;
+  bigPicLikes.removeEventListener('click', onLikesClick);
 };
 
-export { initLikes, resetLikes };
+export { initLikes, onLikesClick, resetLikes };

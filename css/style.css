@@ -1195,7 +1195,7 @@ main {
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 100;
 
   background-color: rgba(0, 0, 0, 0.8);
 }
@@ -1215,6 +1215,7 @@ main {
 
   font-family: "Open Sans", "Arial", sans-serif;
   text-align: center;
+  line-height: 1.5;
   font-weight: 700;
   font-size: 20px;
   color: #ffe753;
@@ -1322,6 +1323,14 @@ main {
           transform: translateX(-50%);
 }
 
+.img-upload__field-wrapper--error {
+  background-color: #bd3315;
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px 65px;
+  margin-top: 100 !important;
+  display: block;
+}
 
 /* Адаптивности чуток
    ========================================================================== */

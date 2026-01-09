@@ -1,26 +1,32 @@
-const API_URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
+const URL = 'https://29.javascript.htmlacademy.pro/kekstagram';
 
-const getData = async () => {
-  const response = await fetch(`${API_URL}/data`);
-
-  if (!response.ok) {
-    throw new Error(`Ошибка загрузки: ${response.status}`);
-  }
-
-  return await response.json();
+const Routes = {
+  GET_DATA: '/data',
+  SEND_DATA: '',
+};
+const Methods = {
+  GET: 'GET',
+  POST: 'POST',
+};
+const ErrorTexts = {
+  GET_DATA: 'Не удалось загрузить данные. Попробуйте обновить страницу',
+  SEND_DATA: 'Не удалось отправить форму. Попробуйте ещё раз',
 };
 
-const sendData = async (formData) => {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    body: formData
-  });
+const loads = (route, errorText, method = Methods.GET, body = null) =>
+  fetch(`${URL}${route}`, { method, body })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(errorText);
+      }
+      return response.json();
+    })
+    .catch(() => {
+      throw new Error(errorText);
+    });
 
-  if (!response.ok) {
-    throw new Error(`Ошибка отправки: ${response.status}`);
-  }
+const getData = () => loads(Routes.GET_DATA, ErrorTexts.GET_DATA);
 
-  return await response.json();
-};
+const sendData = (body) => loads(Routes.SEND_DATA, ErrorTexts.SEND_DATA, Methods.POST, body);
 
 export { getData, sendData };
